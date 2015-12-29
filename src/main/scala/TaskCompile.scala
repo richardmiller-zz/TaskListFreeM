@@ -34,6 +34,6 @@ object TaskCompile {
       case _: FindClosedTasks => State.inspect(asList(_.status == Completed))
     }
 
-    def asList[A](filter: Task => Boolean): (Tasks) => List[Task] = _.map({ case (_, v) => v }).toList.filter(_ => true)
+    def asList[A](f: Task => Boolean): (Tasks) => List[Task] = _.map({ case (_, v) => v }).toList.filter(f)
   }
 }
