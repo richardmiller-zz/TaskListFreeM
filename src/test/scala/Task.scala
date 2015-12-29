@@ -5,9 +5,6 @@ import freetocompose.TransformationOps
 import task.example._
 import TaskQ.composing._
 import TaskC.composing._
-import cats.{Monad, Id}
-import cats.std.list._
-import cats.syntax.foldable._
 import cats.std.function._
 
 class TaskSpec extends Specification { def is = s2"""
