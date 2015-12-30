@@ -1,6 +1,6 @@
 package task.example
 
-import freetocompose.addComposingFunctions
+import freetocompose.{addLiftingFunctions, addComposingFunctions}
 import task.example.TaskEvents.{TaskReopened, TaskCompleted, TaskCommitted, EventStream}
 
 object TaskBehaviours {
@@ -14,6 +14,7 @@ object TaskBehaviours {
 
 object TaskBehaviourC {
   @addComposingFunctions[TaskBehaviours.TaskBehaviour]('TaskBehaviourC) object composing
+  @addLiftingFunctions[TaskBehaviours.TaskBehaviour]('TaskBehaviourC) object functions
 }
 
 final case class TaskAgg(id: String, events: EventStream)

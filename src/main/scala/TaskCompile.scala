@@ -4,6 +4,7 @@ import TaskCommands._
 import TaskQueries._
 import cats.state._
 import cats.~>
+import TaskBehaviourC.functions._
 
 object TaskCompile {
 
@@ -35,5 +36,26 @@ object TaskCompile {
     }
 
     def asList[A](f: Task => Boolean): (Tasks) => List[Task] = _.map({ case (_, v) => v }).toList.filter(f)
+  }
+
+  object toTaskBehaviours extends (TaskCommand ~> TaskBehaviourC) {
+
+    override def apply[A](fa: TaskCommand[A]) = fa match {
+      case CommitToTask(id, text) =>  for {
+        t <- commit(id, text)
+        _ <- save(t)
+      } yield ()
+      case CompleteTask(id) => for {
+        t <- find(id)
+        t2 <- complete(t)
+        _ <- save(t2)
+      } yield ()
+      case ReopenTask(id) => for {
+        t <- find(id)
+        t2 <- reopen(t)
+        _ <- save(t2)
+      } yield ()
+    }
+
   }
 }

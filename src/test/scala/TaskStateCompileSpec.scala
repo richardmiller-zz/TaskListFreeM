@@ -7,7 +7,7 @@ import TaskQ.composing._
 import TaskC.composing._
 import cats.std.function._
 
-class TaskSpec extends Specification { def is = s2"""
+class TaskStateCompileSpec extends Specification { def is = s2"""
 
  This is a specification to check the Task State Compiler
 
