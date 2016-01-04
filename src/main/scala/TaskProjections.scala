@@ -7,6 +7,10 @@ import cats.syntax.semigroup._
 object TaskProjections {
   final case class Task(id: String, text: String, status: TaskStatus)
 
+  sealed trait TaskStatus
+  case object Open extends TaskStatus
+  case object Completed extends TaskStatus
+
   implicit def TaskMonoid = new Monoid[Option[Task]] {
     def combine(a: Option[Task], b: Option[Task]): Option[Task] = (a, b) match {
       case (None, _) => b

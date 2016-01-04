@@ -2,9 +2,7 @@ package test.task.example
 
 import org.specs2.Specification
 import task.example.TaskEvents.{TaskEvent, TaskReopened, TaskCompleted, TaskCommitted}
-import task.example.{Completed, Open}
-import task.example.TaskProjections.Task
-import task.example.TaskProjections.TaskMonoid
+import task.example.TaskProjections.{Completed, Open, Task, TaskMonoid}
 import cats.syntax.semigroup._
 import cats.std.all._
 import cats.syntax.foldable._
@@ -53,10 +51,11 @@ class TaskProjectionsSpec extends Specification { def is = s2"""
       Some(Task("1", "badger", Open)),
       Some(Task("1", "potato", Completed)),
       Some(Task("1", "bananas", Open)),
-      Some(Task("1", "", Open))
+      Some(Task("1", "", Open)),
+      Some(Task("1", "", Completed))
     )
 
-    ts.foldMap(identity) must_== Some(Task("1", "bananas", Open))
+    ts.foldMap(identity) must_== Some(Task("1", "bananas", Completed))
   }
 
   def e8 = {
@@ -67,7 +66,7 @@ class TaskProjectionsSpec extends Specification { def is = s2"""
       TaskCompleted("7")
     )
 
-    ts.foldMap(Task.optionFromEvent) must_== Some(Task("7", "bananas", Completed))
+    Task.project(None, ts) must_== Some(Task("7", "bananas", Completed))
   }
 
   def e9 = {

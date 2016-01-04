@@ -13,7 +13,7 @@ class TaskAggCompilerSpec extends Specification { def is = s2"""
  The TaskAgg State Compiler string should
    save newly commited tasks                                     $e1
    close tasks                                                   $e2
-   repen tasks                                                   $e3
+   reopen tasks                                                  $e3
                                                                  """
 
   val compiler = TaskAggCompile.toState
@@ -25,9 +25,11 @@ class TaskAggCompilerSpec extends Specification { def is = s2"""
     } yield ()
   }
 
-  val r1 = program1.foldMap(compiler).run(Map[String, TaskAgg]()).run
+  private val statingState = (Map[String, TaskAgg](), Map[String, Option[TaskProjections.Task]]())
 
-  def e1 = r1._1 must_== Map("2" -> TaskAgg("2", List(TaskCommitted("2", "My first Task"))))
+  val r1 = program1.foldMap(compiler).run(statingState).run
+
+  def e1 = r1._1._1 must_== Map("2" -> TaskAgg("2", List(TaskCommitted("2", "My first Task"))))
 
   def program2[TaskBehaviourC] = {
     for {
@@ -38,9 +40,9 @@ class TaskAggCompilerSpec extends Specification { def is = s2"""
     } yield ()
   }
 
-  val r2 = program2.foldMap(compiler).run(Map[String, TaskAgg]()).run
+  val r2 = program2.foldMap(compiler).run(statingState).run
 
-  def e2 = r2._1 must_== Map("2" -> TaskAgg("2", List(TaskCommitted("2", "My first Task"), TaskCompleted("2"))))
+  def e2 = r2._1._1 must_== Map("2" -> TaskAgg("2", List(TaskCommitted("2", "My first Task"), TaskCompleted("2"))))
 
   def program3[TaskBehaviourC] = {
     for {
@@ -51,7 +53,7 @@ class TaskAggCompilerSpec extends Specification { def is = s2"""
     } yield ()
   }
 
-  val r3 = program3.foldMap(compiler).run(Map[String, TaskAgg]()).run
+  val r3 = program3.foldMap(compiler).run(statingState).run
 
-  def e3 = r3._1 must_== Map("2" -> TaskAgg("2", List(TaskCommitted("2", "My first Task"), TaskCompleted("2"), TaskReopened("2"))))
+  def e3 = r3._1._1 must_== Map("2" -> TaskAgg("2", List(TaskCommitted("2", "My first Task"), TaskCompleted("2"), TaskReopened("2"))))
 }

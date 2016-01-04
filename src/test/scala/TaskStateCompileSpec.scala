@@ -2,6 +2,7 @@ package test.task.example
 
 import org.specs2.Specification
 import freetocompose.TransformationOps
+import task.example.TaskProjections.{Completed, Open, Task}
 import task.example._
 import TaskQ.composing._
 import TaskC.composing._

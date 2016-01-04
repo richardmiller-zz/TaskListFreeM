@@ -1,6 +1,7 @@
 package task.example
 
 import freetocompose.addComposingFunctions
+import task.example.TaskProjections.Task
 
 object TaskQueries {
   sealed trait TaskQuery[+A]
@@ -13,9 +14,3 @@ object TaskQueries {
 object TaskQ {
   @addComposingFunctions[TaskQueries.TaskQuery]('TaskQ) object composing
 }
-
-final case class Task(id: String, text: String, status: TaskStatus = Open)
-
-sealed trait TaskStatus
-case object Open extends TaskStatus
-case object Completed extends TaskStatus

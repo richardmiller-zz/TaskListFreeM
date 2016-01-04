@@ -10,3 +10,5 @@ libraryDependencies += "org.specs2" %%  "specs2-core" % "3.6.5" % "test"
 resolvers += Resolver.sonatypeRepo("releases")
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.6.3")
