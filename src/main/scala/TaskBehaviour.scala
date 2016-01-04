@@ -22,14 +22,19 @@ final case class TaskAgg(id: String, events: EventStream)
 object TaskAgg {
   def commit(id: String, text: String): EventStream = List(TaskCommitted(id, text))
 
-  def complete(t: TaskAgg): EventStream = t match {
-    case TaskAgg(id, es) if es.exists { case _:TaskCommitted => true case _ => false } => List(TaskCompleted(t.id))
-    case _ => List()
+  def complete(t: TaskAgg): EventStream = emitIfCommitted(t, List(TaskCompleted(t.id)))
+
+  def reopen(t: TaskAgg): EventStream = emitIfCommitted(t, List(TaskReopened(t.id)))
+
+  private def emitIfCommitted(t: TaskAgg, events: EventStream): EventStream = {
+    t match {
+      case TaskAgg(id, es) if hasBeenCommitted(es) => events
+      case _ => List()
+    }
   }
 
-  def reopen(t: TaskAgg): EventStream = t match {
-    case TaskAgg(id, es) if es.exists { case _:TaskCommitted => true case _ => false } => List(TaskReopened(t.id))
-    case _ => List()
+  private def hasBeenCommitted(es: EventStream): Boolean = {
+    es.exists { case _: TaskCommitted => true case _ => false }
   }
 }
 
