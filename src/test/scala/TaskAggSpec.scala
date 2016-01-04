@@ -14,9 +14,9 @@ class TaskAggSpec extends Specification { def is = s2"""
    repen tasks                                                   $e3
                                                                  """
 
-  def e1 = TaskAgg.commit("5", "Feed the badgers") must_== TaskAgg("5", List(TaskCommitted("5", "Feed the badgers")))
+  def e1 = TaskAgg.commit("5", "Feed the badgers") must_== List(TaskCommitted("5", "Feed the badgers"))
 
-  def e2 = TaskAgg.complete(TaskAgg("5", List(TaskCommitted("5", "Feed the badgers")))) must_== TaskAgg("5", List(TaskCommitted("5", "Feed the badgers"), TaskCompleted("5")))
+  def e2 = TaskAgg.complete(TaskAgg("5", List(TaskCommitted("5", "Feed the badgers")))) must_== List(TaskCompleted("5"))
 
-  def e3 = TaskAgg.reopen(TaskAgg("5", List(TaskCommitted("5", "Feed the badgers")))) must_== TaskAgg("5", List(TaskCommitted("5", "Feed the badgers"), TaskReopened("5")))
+  def e3 = TaskAgg.reopen(TaskAgg("5", List(TaskCommitted("5", "Feed the badgers")))) must_== List(TaskReopened("5"))
 }

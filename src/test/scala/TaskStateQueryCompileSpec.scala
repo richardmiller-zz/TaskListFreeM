@@ -3,6 +3,7 @@ package test.task.example
 import cats.free.Free
 import org.specs2.Specification
 import task.example.TaskCompile._
+import task.example.TaskEvents.EventStream
 import task.example.TaskProjections.{Completed, Open, Task}
 import task.example._
 import TaskQ.composing._
@@ -22,7 +23,7 @@ class TaskStateQueryCompileSpec extends Specification { def is = s2"""
 
 
 
-  val statingState = (Map[String, TaskAgg](), Map[String, Option[TaskProjections.Task]]())
+  val statingState = (Map[String, EventStream](), Map[String, Option[TaskProjections.Task]]())
 
   val program1: Free[CommandOrQuery, Option[Task]] = {
     for {

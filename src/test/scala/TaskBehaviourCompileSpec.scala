@@ -5,7 +5,7 @@ import org.specs2.Specification
 import task.example.TaskBehaviours.TaskBehaviour
 import task.example.TaskCommands.TaskCommand
 import task.example.TaskCompile._
-import task.example.TaskEvents.{TaskReopened, TaskCompleted, TaskCommitted}
+import task.example.TaskEvents.{EventStream, TaskReopened, TaskCompleted, TaskCommitted}
 import task.example.TaskProjections.Task
 import task.example._
 import TaskC.composing._
@@ -32,18 +32,18 @@ class TaskBehaviourCompileSpec extends Specification { def is = s2"""
       _ <- completeTask("2")
     } yield ()
   }
-  val statingState = (Map[String, TaskAgg](), Map[String, Option[TaskProjections.Task]]())
+  val statingState = (Map[String, EventStream](), Map[String, Option[TaskProjections.Task]]())
   val r3 = program.foldMap[Free[TaskBehaviour, ?]](behaviourCompiler).foldMap(stateCompiler).run(statingState).run
 
   def e1 = r3._1._1 must_== Map(
-    "2" -> TaskAgg("2", List(
+    "2" -> List(
       TaskCommitted("2", "My first Task"),
       TaskCompleted("2"),
       TaskReopened("2"),
       TaskCompleted("2")
-    )),
-    "3" -> TaskAgg("3", List(
+    ),
+    "3" -> List(
       TaskCommitted("3", "My second Task")
-    ))
+    )
   )
 }

@@ -99,21 +99,21 @@ object TaskCompile {
 
     override def apply[A](fa: TaskCommand[A]) = fa match {
       case CommitToTask(id, text) =>  for {
-        t <- commit(id, text)
-        _ <- save(t)
-        _ <- project(t)
+        es <- commit(id, text)
+        _ <- save(id, es)
+        _ <- project(id, es)
       } yield ()
       case CompleteTask(id) => for {
         t <- find(id)
-        t2 <- complete(t)
-        _ <- save(t2)
-        _ <- project(t2)
+        es <- complete(t)
+        _ <- save(id, es)
+        _ <- project(id, es)
       } yield ()
       case ReopenTask(id) => for {
         t <- find(id)
-        t2 <- reopen(t)
-        _ <- save(t2)
-        _ <- project(t2)
+        es <- reopen(t)
+        _ <- save(id, es)
+        _ <- project(id, es)
       } yield ()
     }
 
