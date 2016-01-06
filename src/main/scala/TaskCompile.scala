@@ -3,14 +3,22 @@ package task.example
 import TaskCommands._
 import TaskQueries._
 import cats.state._
-import cats.~>
+import cats.{Functor, ~>}
 import TaskBehaviourC.composing._
+import monocle.Iso
+import monocle.macros.GenLens
+import monocle.function.all._
+import monocle.std.list._
+import monocle.std.tuple2._
+import monocle.syntax.all._
 import task.example.TaskBehaviours.TaskBehaviour
-import task.example.TaskProjections.{Completed, Open, Task}
+import task.example.TaskProjections.{TaskProjection, Completed, Open, Task}
 import scala.language.higherKinds
 import cats.free.Free
 import cats.data.Xor
 import cats.syntax.xor._
+import monocle.std.map._
+import cats.std.option._
 
 object TaskCompile {
 
@@ -26,40 +34,60 @@ object TaskCompile {
 
   object toStateC extends (TaskCommand ~> MapState) {
 
+    private val taskStatus = GenLens[Task](_.status)
+    private val root = Iso.id[Map[String, Task]]
+
+    def insertTask(id: String, t: Task)(ts: Tasks): Tasks =
+      (root composeLens at(id)).set(Some(t))(ts)
+
+    def updateTask(f: Task => Task)(id: String)(ts: Tasks): Tasks =
+      (root composeLens at(id) modify Functor[Option].lift(f))(ts)
+
+    val openTask = updateTask(taskStatus set Open) _
+    val completeTask = updateTask(taskStatus set Completed) _
+
+    def modS[A](f: Tasks => Tasks, g: Unit => A = identity[Unit] _) = State modify f map g
+
     override def apply[A](fa: TaskCommand[A]) = fa match {
-      case CommitToTask(id, text) => State.modify((ts: Tasks) => ts + (id -> Task(id, text, Open))).map(_ => ())
-      case CompleteTask(id) => State.modify(updateTask(id, _.copy(status = Completed))).map(_ => ())
-      case ReopenTask(id) => State.modify(updateTask(id, _.copy(status = Open))).map(_ => ())
+      case CommitToTask(id, text) => modS(insertTask(id, Task(id, text, Open)))
+      case CompleteTask(id) => modS(completeTask(id))
+      case ReopenTask(id) => modS(openTask(id))
     }
-
-    private def updateTask[A](id: String, f: Task => Task)(ts: Tasks) = {
-      ts.get(id).fold(ts)(t => ts + (id -> f(t)))
-    }
-
   }
 
   object toStateQ extends (TaskQuery ~> MapState) {
 
+    def fromS[A](f: Tasks => A) = State.inspect(f)
+
+    def asList(f: Task => Boolean)(ts: Tasks) = ts.map({ case (_, v) => v }).toList.filter(f)
+
     override def apply[A](fa: TaskQuery[A]) = fa match {
-      case ReadTask(id) => State.inspect(_.get(id))
-      case _: FindAllTasks => State.inspect(asList(_ => true))
-      case _: FindOpenTasks => State.inspect(asList(_.status == Open))
-      case _: FindClosedTasks => State.inspect(asList(_.status == Completed))
+      case ReadTask(id) => fromS(_.get(id))
+      case _: FindAllTasks => fromS(asList(_ => true))
+      case _: FindOpenTasks => fromS(asList(_.status == Open))
+      case _: FindClosedTasks => fromS(asList(_.status == Completed))
     }
 
-    def asList[A](f: Task => Boolean): (Tasks) => List[Task] = _.map({ case (_, v) => v }).toList.filter(f)
   }
 
   object toProjectionsStateQ extends (TaskQuery ~> TaskAggCompile.MapState) {
 
+    def fromS[A](f: TaskAggCompile.Tasks => A) = State.inspect(f)
+
+    def projections(ts: TaskAggCompile.Tasks) = ts applyLens second
+
+    def findTask(id: String)(ts: TaskAggCompile.Tasks): Option[TaskProjection] =
+      (projections(ts) composeLens at(id)).get
+
     override def apply[A](fa: TaskQuery[A]) = fa match {
-      case ReadTask(id) => State.inspect(_._2.get(id).flatten)
-      case _: FindAllTasks => State.inspect(asList(_ => true))
-      case _: FindOpenTasks => State.inspect(asList(_.status == Open))
-      case _: FindClosedTasks => State.inspect(asList(_.status == Completed))
+      case ReadTask(id) => fromS(findTask(id))
+      case _: FindAllTasks => fromS(asList(_ => true))
+      case _: FindOpenTasks => fromS(asList(t => t match {case Task(_,_,Open) => true case _ => false}))
+      case _: FindClosedTasks => fromS(asList(t => t match {case Task(_,_,Completed) => true case _ => false}))
     }
 
-    def asList[A](f: Task => Boolean): (TaskAggCompile.Tasks) => List[Task] = _._2.flatMap({ case (_, v) => v }).toList.filter(f)
+    def asList(f: TaskProjection => Boolean)(ts: TaskAggCompile.Tasks): List[TaskProjection] =
+      (projections(ts) composeTraversal each).getAll.filter(f)
   }
 
   object identityQ extends (TaskQuery ~> Free[TaskQuery, ?]) {

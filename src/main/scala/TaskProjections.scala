@@ -2,38 +2,38 @@ package task.example
 
 import cats.Monoid
 import task.example.TaskEvents._
-import cats.syntax.semigroup._
+import cats.implicits._
 
 object TaskProjections {
-  final case class Task(id: String, text: String, status: TaskStatus)
+  sealed trait TaskProjection
+  final case class Task(id: String, text: String, status: TaskStatus) extends TaskProjection
+  case object EmptyTask extends TaskProjection
 
   sealed trait TaskStatus
   case object Open extends TaskStatus
   case object Completed extends TaskStatus
 
-  implicit def TaskMonoid = new Monoid[Option[Task]] {
-    def combine(a: Option[Task], b: Option[Task]): Option[Task] = (a, b) match {
-      case (None, _) => b
-      case (_, None) => a
-      case (Some(Task(ai, _, _)), Some(Task(bi, _, _))) if ai != bi => None
-      case (Some(Task(ai, at, as)), Some(Task(bi, bt, bs))) =>
+  implicit val TaskMonoid = new Monoid[TaskProjection] {
+    def combine(a: TaskProjection, b: TaskProjection): TaskProjection = (a, b) match {
+      case (EmptyTask, _) => b
+      case (_, EmptyTask) => a
+      case (Task(ai, _, _), Task(bi, _, _)) if ai != bi => EmptyTask
+      case (Task(ai, at, as), Task(bi, bt, bs)) =>
         val t = if (bt == "") at else bt
-        Some(Task(bi, t, bs))
+        Task(bi, t, bs)
     }
 
-    def empty: Option[Task] = None
+    def empty: TaskProjection = EmptyTask
   }
 
   object Task {
-    def fromEvent(e: TaskEvent): Task = e match {
+    def fromEvent(e: TaskEvent): TaskProjection = e match {
       case TaskCommitted(i, t) => Task(i, t, Open)
       case TaskCompleted(i) => Task(i, "", Completed)
       case TaskReopened(i) => Task(i, "", Open)
     }
 
-    val optionFromEvent: (TaskEvent => Option[Task]) = fromEvent _ andThen (t => Some(t))
-
-    def project(t: Option[Task], es: EventStream) = es.map(optionFromEvent).foldLeft(t)(_ |+| _)
+    def project(t: TaskProjection, es: EventStream) = t |+| es.foldMap(fromEvent)
   }
 
 }

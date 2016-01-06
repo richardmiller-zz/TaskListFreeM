@@ -10,6 +10,7 @@ import task.example.TaskProjections.Task
 import task.example._
 import TaskC.composing._
 import cats.std.function._
+import scala.language.higherKinds
 
 class TaskBehaviourCompileSpec extends Specification { def is = s2"""
 
@@ -32,7 +33,7 @@ class TaskBehaviourCompileSpec extends Specification { def is = s2"""
       _ <- completeTask("2")
     } yield ()
   }
-  val statingState = (Map[String, EventStream](), Map[String, Option[TaskProjections.Task]]())
+  val statingState = (Map[String, EventStream](), Map[String, TaskProjections.TaskProjection]())
   val r3 = program.foldMap[Free[TaskBehaviour, ?]](behaviourCompiler).foldMap(stateCompiler).run(statingState).run
 
   def e1 = r3._1._1 must_== Map(

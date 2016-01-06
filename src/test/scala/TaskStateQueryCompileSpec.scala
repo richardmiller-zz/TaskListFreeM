@@ -4,12 +4,13 @@ import cats.free.Free
 import org.specs2.Specification
 import task.example.TaskCompile._
 import task.example.TaskEvents.EventStream
-import task.example.TaskProjections.{Completed, Open, Task}
+import task.example.TaskProjections.{TaskProjection, Completed, Open, Task}
 import task.example._
 import TaskQ.composing._
 import TaskC.composing._
 import cats.free.Free._
 import cats.std.all._
+import scala.language.higherKinds
 
 class TaskStateQueryCompileSpec extends Specification { def is = s2"""
 
@@ -23,9 +24,9 @@ class TaskStateQueryCompileSpec extends Specification { def is = s2"""
 
 
 
-  val statingState = (Map[String, EventStream](), Map[String, Option[TaskProjections.Task]]())
+  val statingState = (Map[String, EventStream](), Map[String, TaskProjection]())
 
-  val program1: Free[CommandOrQuery, Option[Task]] = {
+  val program1: Free[CommandOrQuery, Option[TaskProjection]] = {
     for {
       _ <- commitToTask("2", "My first Task").lift
       t <- readTask("2").lift
@@ -36,7 +37,7 @@ class TaskStateQueryCompileSpec extends Specification { def is = s2"""
 
   def e1 = r1._2 must_== Some(Task("2", "My first Task", Open))
 
-  def program2: Free[CommandOrQuery, List[Task]] = {
+  def program2: Free[CommandOrQuery, List[TaskProjection]] = {
     for {
       _ <- commitToTask("2", "My first Task").lift
       _ <- commitToTask("3", "My second Task").lift
@@ -48,7 +49,7 @@ class TaskStateQueryCompileSpec extends Specification { def is = s2"""
 
   def e2 = r2._2 must_== List(Task("2", "My first Task", Open), Task("3", "My second Task", Open))
 
-  def program3: Free[CommandOrQuery, List[Task]] = {
+  def program3: Free[CommandOrQuery, List[TaskProjection]] = {
     for {
       _ <- commitToTask("2", "My first Task").lift
       _ <- commitToTask("3", "My second Task").lift

@@ -7,6 +7,7 @@ import task.example._
 import TaskQ.composing._
 import TaskC.composing._
 import cats.std.function._
+import scala.language.higherKinds
 
 class TaskStateCompileSpec extends Specification { def is = s2"""
 

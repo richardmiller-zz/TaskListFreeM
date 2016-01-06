@@ -5,6 +5,7 @@ import task.example.TaskEvents.{EventStream, TaskReopened, TaskCompleted, TaskCo
 import task.example._
 import TaskBehaviourC.composing._
 import cats.std.function._
+import scala.language.higherKinds
 
 class TaskAggCompilerSpec extends Specification { def is = s2"""
 
@@ -25,7 +26,7 @@ class TaskAggCompilerSpec extends Specification { def is = s2"""
     } yield ()
   }
 
-  private val statingState = (Map[String, EventStream](), Map[String, Option[TaskProjections.Task]]())
+  private val statingState = (Map[String, EventStream](), Map[String, TaskProjections.TaskProjection]())
 
   val r1 = program1.foldMap(compiler).run(statingState).run
 
