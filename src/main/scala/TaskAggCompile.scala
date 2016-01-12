@@ -10,7 +10,7 @@ import monocle.function.Field1._
 import monocle.function.Field2._
 import monocle.std.map._
 import monocle.std.tuple2._
-import monocle.syntax.all._
+import monocle.syntax._
 import TaskProjections.Task.project
 import task.example.TaskProjections.{EmptyTask, TaskProjection}
 

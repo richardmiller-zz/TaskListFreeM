@@ -7,10 +7,10 @@ import cats.{Functor, ~>}
 import TaskBehaviourC.composing._
 import monocle.Iso
 import monocle.macros.GenLens
-import monocle.function.all._
+import monocle.function._
 import monocle.std.list._
 import monocle.std.tuple2._
-import monocle.syntax.all._
+import monocle.syntax._
 import task.example.TaskBehaviours.TaskBehaviour
 import task.example.TaskProjections.{TaskProjection, Completed, Open, Task}
 import scala.language.higherKinds

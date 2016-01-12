@@ -4,17 +4,23 @@ version := "1.0"
 
 scalaVersion := "2.11.7"
 
-val libraryVersion = "1.2.0"
+lazy val monocleVersion = "1.1.1"
+lazy val doobieVersion = "0.2.3"
+lazy val circeVersion = "0.2.1"
 
 libraryDependencies ++= Seq(
   "org.spire-math" %% "cats" % "0.3.0",
-  "org.specs2" %%  "specs2-core" % "3.7" % "test",
-  "com.github.julien-truffaut"  %%  "monocle-core"    % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-generic" % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-macro"   % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-state"   % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-refined" % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-law"     % libraryVersion % "test"
+  "org.specs2" %%  "specs2-core" % "3.6" % "test",
+  "com.github.julien-truffaut"  %%  "monocle-core"    % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-generic" % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-macro"   % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-law"     % monocleVersion % "test",
+  "org.tpolecat" %% "doobie-core"               % doobieVersion,
+  "org.tpolecat" %% "doobie-contrib-h2"        % doobieVersion,
+  "org.tpolecat" %% "doobie-contrib-specs2"     % doobieVersion,
+  "io.circe" %% "circe-core" % circeVersion,
+  "io.circe" %% "circe-generic" % circeVersion,
+  "io.circe" %% "circe-parse" % circeVersion
 )
 
 

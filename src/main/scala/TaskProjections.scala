@@ -27,6 +27,7 @@ object TaskProjections {
   }
 
   object Task {
+
     def fromEvent(e: TaskEvent): TaskProjection = e match {
       case TaskCommitted(i, t) => Task(i, t, Open)
       case TaskCompleted(i) => Task(i, "", Completed)
