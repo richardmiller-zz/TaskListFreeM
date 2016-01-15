@@ -5,7 +5,7 @@ import org.specs2.Specification
 import task.example.TaskBehaviours.TaskBehaviour
 import task.example.TaskCommands.TaskCommand
 import task.example.TaskCompile._
-import task.example.TaskEvents.{EventStream, TaskReopened, TaskCompleted, TaskCommitted}
+import task.example.ATaskEvents.{EventStream, TaskReopened, TaskCompleted, TaskCommitted}
 import task.example.TaskProjections.Task
 import task.example._
 import TaskC.composing._

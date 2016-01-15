@@ -1,7 +1,7 @@
 package task.example
 
 import freetocompose.addComposingFunctions
-import task.example.TaskEvents.{TaskReopened, TaskCompleted, TaskCommitted, EventStream}
+import ATaskEvents.{TaskReopened, TaskCompleted, TaskCommitted, EventStream}
 
 object TaskBehaviours {
   sealed trait TaskBehaviour[+A]
@@ -37,14 +37,3 @@ object TaskAgg {
     es.exists { case _: TaskCommitted => true case _ => false }
   }
 }
-
-object TaskEvents {
-  type EventStream = List[TaskEvent]
-  sealed trait TaskEvent {
-    def id: String
-  }
-  final case class TaskCommitted(id: String, text: String) extends TaskEvent
-  final case class TaskCompleted(id: String) extends TaskEvent
-  final case class TaskReopened(id: String) extends TaskEvent
-}
-

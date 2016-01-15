@@ -1,7 +1,7 @@
 package task.example
 
 import cats.Monoid
-import task.example.TaskEvents._
+import ATaskEvents._
 import cats.implicits._
 
 object TaskProjections {

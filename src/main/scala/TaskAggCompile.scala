@@ -5,7 +5,7 @@ import cats.~>
 import TaskBehaviours._
 import monocle.Iso
 import monocle.function.At._
-import task.example.TaskEvents.EventStream
+import ATaskEvents.EventStream
 import monocle.function.Field1._
 import monocle.function.Field2._
 import monocle.std.map._

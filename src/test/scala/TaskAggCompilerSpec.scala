@@ -1,7 +1,7 @@
 package test.task.example
 
 import org.specs2.Specification
-import task.example.TaskEvents.{EventStream, TaskReopened, TaskCompleted, TaskCommitted}
+import task.example.ATaskEvents.{EventStream, TaskReopened, TaskCompleted, TaskCommitted}
 import task.example._
 import TaskBehaviourC.composing._
 import cats.std.function._

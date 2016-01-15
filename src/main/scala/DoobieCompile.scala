@@ -4,12 +4,12 @@ import scalaz._, Scalaz._
 import cats.{Monad, ~>}
 import doobie.contrib.h2.h2transactor.H2Transactor
 import TaskBehaviours._
-import TaskEvents.EventStream
-import task.example.TaskCompile.BehaviourOrQuery
-import task.example.TaskProjections.{Task => TaskP, _}
-import task.example.TaskQueries._
+import ATaskEvents.EventStream
+import TaskCompile.BehaviourOrQuery
+import TaskProjections.{Task => TaskP, _}
+import TaskQueries._
 import scalaz.concurrent.Task
-import task.example.TaskEvents.TaskEvent
+import ATaskEvents.TaskEvent
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.parse._

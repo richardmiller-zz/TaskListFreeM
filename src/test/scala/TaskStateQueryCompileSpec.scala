@@ -3,7 +3,7 @@ package test.task.example
 import cats.free.Free
 import org.specs2.Specification
 import task.example.TaskCompile._
-import task.example.TaskEvents.EventStream
+import task.example.ATaskEvents.EventStream
 import task.example.TaskProjections.{TaskProjection, Completed, Open, Task}
 import task.example._
 import TaskQ.composing._

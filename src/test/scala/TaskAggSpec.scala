@@ -1,7 +1,7 @@
 package test.task.example
 
 import org.specs2.Specification
-import task.example.TaskEvents.{TaskReopened, TaskCompleted, TaskCommitted}
+import task.example.ATaskEvents.{TaskReopened, TaskCompleted, TaskCommitted}
 import task.example.TaskAgg
 
 class TaskAggSpec extends Specification { def is = s2"""

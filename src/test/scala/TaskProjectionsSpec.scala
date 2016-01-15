@@ -1,7 +1,7 @@
 package test.task.example
 
 import org.specs2.Specification
-import task.example.TaskEvents.{TaskEvent, TaskReopened, TaskCompleted, TaskCommitted}
+import task.example.ATaskEvents.{TaskEvent, TaskReopened, TaskCompleted, TaskCommitted}
 import task.example.TaskProjections._
 import cats.syntax.semigroup._
 import cats.std.all._
