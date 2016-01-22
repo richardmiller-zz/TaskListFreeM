@@ -1,5 +1,7 @@
 package task.example
 
+import task.example.IdentityGenCompile.BehaviourOrIdentity
+
 import scalaz._, Scalaz._
 import cats.{Monad, ~>}
 import doobie.contrib.h2.h2transactor.H2Transactor
@@ -115,6 +117,10 @@ object DoobieCompile {
 
   def XorDoobieInterpreter = new (BehaviourOrQuery ~> Task) {
     override def apply[A](fa: BehaviourOrQuery[A]) = fa.fold(_.foldMap(behaviour), _.foldMap(queries))
+  }
+
+  def XorDoobieIdentityGenInterpreter = new (BehaviourOrIdentity ~> Task) {
+    override def apply[A](fa: BehaviourOrIdentity[A]) = fa.fold(_.foldMap(behaviour), _.foldMap(IdentityGenCompile.standard))
   }
 
   def dbSetUp = {

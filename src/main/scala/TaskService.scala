@@ -1,7 +1,5 @@
 package task.example
 
-import java.util.UUID
-
 import JsonConversion._
 import org.http4s._
 import org.http4s.headers.Location
@@ -11,6 +9,7 @@ import org.http4s.rho.bits.PathAST.TypedPath
 import org.http4s.rho.swagger.SwaggerSupport
 import shapeless.HNil
 import task.example.DoobieCompile._
+import task.example.IdentityGenCompile._
 import task.example.TaskBehaviours.TaskBehaviour
 import task.example.TaskCommands.TaskCommand
 import task.example.TaskProjections.{Task, TaskProjection}
@@ -20,12 +19,15 @@ import io.circe.parse._
 import io.circe.syntax._
 import TaskQ.composing._
 import TaskC.composing._
+import IdentityGen.composing._
 import cats.free.Free
 import cats.free.Free._
 import org.http4s.rho.hal.{ResourceObjectBuilder => ResObjBuilder, ResourceObject}
 import task.example.TaskQueries.TaskQuery
 
 object TaskService extends RhoService with SwaggerSupport {
+
+  type FFS[A] = Free[CommandOrIdentity, A]
 
   type HalTaskCollection = ResourceObject[(String, Long), Task]
   val tasksU : TypedPath[HNil]= "tasks"
@@ -53,8 +55,13 @@ object TaskService extends RhoService with SwaggerSupport {
   POST / tasksU ^ EntityDecoder.text |>> { body: String => decode[TaskRequest](body).fold(
     e => BadRequest(s"Invalid task: $body"),
     t => {
-      val id: String = UUID.randomUUID.toString
-      runCommandPrg(for {_ <- commitToTask(id, t.text)} yield ())
+      val prg: Free[CommandOrIdentity, String] = for {
+        id <- generateUuid.lift
+        _ <- commitToTask(id, t.text).lift
+      } yield id
+
+      val id = runCommandPrg(prg)
+
       (for (uri <- Uri.fromString("/tasks/" + id)) yield uri).fold(
         _ => Accepted(""),
         u => Accepted("", Headers(Location(u)))
@@ -63,12 +70,12 @@ object TaskService extends RhoService with SwaggerSupport {
   )}
 
   POST / openTasksU  / taskIdU |>> { id: String => {
-    runCommandPrg(for {_ <- reopenTask(id)} yield ())
+    runCommandPrg(for {_ <- reopenTask(id).lift} yield ())
     Accepted("")
   }}
 
   POST / completedTasksU  / taskIdU |>> { id: String => {
-    runCommandPrg(for {_ <- completeTask(id)} yield ())
+    runCommandPrg(for {_ <- completeTask(id).lift} yield ())
     Accepted("")
   }}
 
@@ -83,8 +90,8 @@ object TaskService extends RhoService with SwaggerSupport {
   private def runCollectionQueryPrg(r: Request, prg: Free[TaskQuery, List[TaskProjection]]) =
     HalSupport.tasksAsResource(r, runQueryPrg(prg))
 
-  private def runCommandPrg(prg: Free[TaskCommand, Unit]): Unit =
-    prg.foldMap[Free[TaskBehaviour, ?]](TaskCompile.toTaskBehaviours).foldMap(DoobieCompile.behaviour).run
+  private def runCommandPrg[A](prg: FFS[A]) =
+    prg.foldMap(IdentityGenCompile.XorInterpreter).foldMap(DoobieCompile.XorDoobieIdentityGenInterpreter).run
 
   private def taskNotFound(id: String) = NotFound(s"Task $id not found")
 
